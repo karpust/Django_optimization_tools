@@ -1,3 +1,5 @@
+import hashlib
+import random
 from django import forms
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from .models import ShopUser
@@ -26,6 +28,22 @@ class ShopUserRegisterForm(UserCreationForm):
         for field_name, field in self.fields.items():
             field.widget.attrs['class'] = 'form-control'
             field.help_text = ''
+
+    def save(self):
+        """
+        override parent save()
+        to add new fields to the form:
+        is_active, activation_key
+        """
+        # get parent ShopUserRegisterForm:
+        user = super().save(commit=False)
+        # make user inactive until confirm yourself by clicking on link in email:
+        user.is_active = False
+        salt = hashlib.sha1(str(random.random()).encode('utf8')).hexdigest()[:6]
+        user.activation_key = hashlib.sha1((user.email + salt).encode('utf8')).hexdigest()
+        # create new user in db:
+        user.save()
+        return user
     
     def clean_age(self):
         data = self.cleaned_data['age']

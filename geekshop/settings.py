@@ -134,3 +134,19 @@ MEDIA_URL = '/media/'
 AUTH_USER_MODEL = 'authapp.ShopUser'
 
 LOGIN_URL = '/auth/login/'
+
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+DOMAIN_NAME = 'http://localhost:8000'
+# адрес почтового сервера (smtp.mail.ru):
+EMAIL_HOST = 'localhost'
+EMAIL_PORT = '25'
+# имя пользователя, от которого будет отправлена почта (someuser@mail.ru):
+EMAIL_HOST_USER = 'django@geekshop.local'
+EMAIL_HOST_PASSWORD = 'geekshop'
+# без шифрования пока:
+EMAIL_USE_SSL = False
+
+# вариант логирования сообщений почты в виде файлов вместо отправки:
+EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
+EMAIL_FILE_PATH = 'tmp/email-messages/'
