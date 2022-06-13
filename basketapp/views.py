@@ -12,13 +12,13 @@ from django.http import JsonResponse
 def basket(request):
     title = 'корзина'
     
-    basket_items = Basket.objects.filter(user=request.user).order_by('product__category')
+    # basket_items = Basket.objects.filter(user=request.user).order_by('product__category')
     
     content = {
         'title': title,
-        'basket_items': basket_items,
+        # 'basket_items': basket_items,
     }
-    
+    # while rendering html context processor transfer key basket with value:
     return render(request, 'basketapp/basket.html', content)
 
  
