@@ -1,5 +1,6 @@
+from django.db import transaction
 from django.shortcuts import render, HttpResponseRedirect
-from authapp.forms import ShopUserLoginForm, ShopUserRegisterForm
+from authapp.forms import ShopUserLoginForm, ShopUserRegisterForm, ShopUserProfileEditForm
 from django.contrib import auth
 from django.urls import reverse
 
@@ -63,18 +64,30 @@ def register(request):
         return render(request, 'authapp/register.html', content)
 
 
+# декоратор для целостности данных (транзакция все или ничего)
+# две связанные таблицы в рамках одной транзакции
+@transaction.atomic
 def edit(request):
     title = 'редактирование'
     if request.method == 'POST':
-        edit_form = ShopUserEditForm(request.POST, request.FILES, instance=request.user)
-        if edit_form.is_valid():
-            edit_form.save()
+        edit_form = ShopUserEditForm(request.POST, request.FILES,
+                                     instance=request.user)
+        profile_form = ShopUserProfileEditForm(request.POST,
+                                               instance=request.user.shopuserprofile)
+        if edit_form.is_valid() and profile_form.is_valid():
+            edit_form.save()  # сработает сигнал для ShopUserProfile
             return HttpResponseRedirect(reverse('auth:edit'))
     else:
         edit_form = ShopUserEditForm(instance=request.user)
-
-    content = {'title': title, 'edit_form': edit_form}
-    return render(request, 'authapp/edit.html', content)
+        profile_form = ShopUserProfileEditForm(
+            instance=request.user.shopuserprofile
+            )
+        content = {
+            'title': title,
+            'edit_form': edit_form,
+            'profile_form': profile_form
+            }
+        return render(request, 'authapp/edit.html', content)
 
 
 def send_verify_mail(user):
@@ -92,7 +105,8 @@ def verify(request, email, activation_key):
         if user.activation_key == activation_key and not user.is_activation_key_expired():
             user.is_active = True
             user.save()
-            auth.login(request, user)
+            # auth.login(request, user)
+            auth.login(request, user, backend='django.contrib.auth.backends.ModelBackend')
             return render(request, 'authapp/verification.html')
         else:
             print(f'error activation user: {user}')
