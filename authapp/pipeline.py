@@ -19,7 +19,7 @@ def save_user_profile(backend, user, response, *args, **kwargs):
                               access_token=response['access_token'],
                               v='5.92')), None
                           ))
-# https://api.vk.com/method/users.get?fields=bdate%2Csex%2Cabout&access_token=vk1.a.lFFKKe-nkfG__hUmHlnaGmuD9HjbqTzLNu3ulfVP3LmWG1C30BeqZzsySULiWVq8PvGDGr_p2E1S_cqMNiTMAyZRGGpwX8q9hKifQ-BbtzyEmlYd1m9WOSpXBSaLm0PsJewvdNpBhcRniAm6DdPfHRF3nLY1pWkSGc_ZXyh060mkB1Uv-TfJGkYOiRxLXg2V&v=5.92
+
     resp = requests.get(api_url)
     if resp.status_code != 200:
         return
