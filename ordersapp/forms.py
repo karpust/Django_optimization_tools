@@ -15,6 +15,8 @@ class OrderForm(forms.ModelForm):
 
 
 class OrderItemForm(forms.ModelForm):
+    # required=False тк поле не должно сохраняться в базу и проходить валидацию:
+    price = forms.CharField(label='цена', required=False)
 
     class Meta:
         model = OrderItem

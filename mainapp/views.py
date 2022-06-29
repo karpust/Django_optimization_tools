@@ -8,6 +8,11 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 JSON_PATH = 'mainapp/json'
 
+# import sentry_sdk
+# sentry_sdk.init(
+#     dsn="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+#     traces_sample_rate=1.0
+# )
 
 def load_from_json(file_name):
     with open(os.path.join(JSON_PATH, file_name + '.json'), 'r') as infile:
@@ -77,8 +82,13 @@ def products(request, pk=None, page=1):
             'products': products_paginator,
             # 'basket': basket,
         }
-        
-        return render(request, 'mainapp/products_list.html', content)
+
+        # try:
+        #     a = []
+        #     d = a[10]
+        # except Exception as e:
+        #     sentry_sdk.capture_exception(error=e)
+        # return render(request, 'mainapp/products_list.html', content)
     
     hot_product = get_hot_product()
     same_products = get_same_products(hot_product)
