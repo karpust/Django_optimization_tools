@@ -1,6 +1,6 @@
 {% load my_tags %}
 
-{% for item in basket_items %}
+{% for item in basket %}
     <div class="basket_record">
         <img src="{{ item.product.image|media_folder_products }}" alt="{{ item.product.short_desc }}">
         <span class="category_name">{{ item.product.category.name }}</span>
