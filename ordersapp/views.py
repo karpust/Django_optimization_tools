@@ -1,11 +1,12 @@
 from django.db import transaction
 from django.forms import inlineformset_factory
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render, get_object_or_404, reverse
 from django.urls import reverse_lazy
 from django.views.generic import ListView, CreateView, DetailView, UpdateView, DeleteView
 
 from basketapp.models import Basket
+from mainapp.models import Product
 from .forms import OrderItemForm
 from .models import Order, OrderItem
 from django.dispatch import receiver
@@ -149,3 +150,12 @@ def order_forming_complete(request, pk):
     order.status = Order.SENT_TO_PROCEED  # присвоим константу а не значение, удобнее для дальнейшей поддержки
     order.save()
     return HttpResponseRedirect(reverse('ordersapp:orders_list'))
+
+
+def get_product_price(request, pk):
+    if request.is_ajax():
+        product = Product.objects.filter(pk=int(pk)).first()
+        if product:
+            return JsonResponse({'price': product.price})
+        else:
+            return JsonResponse({'price': 0})
