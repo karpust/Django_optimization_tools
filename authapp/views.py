@@ -1,3 +1,4 @@
+from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.shortcuts import render, HttpResponseRedirect
 from authapp.forms import ShopUserLoginForm, ShopUserRegisterForm, ShopUserProfileEditForm
@@ -66,6 +67,7 @@ def register(request):
 
 # декоратор для целостности данных (транзакция все или ничего)
 # две связанные таблицы в рамках одной транзакции
+@login_required
 @transaction.atomic
 def edit(request):
     title = 'редактирование'

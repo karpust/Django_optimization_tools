@@ -6,8 +6,8 @@ class ProductCategory(models.Model):
     description = models.TextField(verbose_name='описание категории', blank=True)
     is_active = models.BooleanField(verbose_name='категория активна', default=True)
     
-    def __str__(self):
-        return self.name
+    # def __str__(self):
+    #     return self.name
 
     
 class Product(models.Model):

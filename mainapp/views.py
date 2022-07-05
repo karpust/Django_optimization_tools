@@ -14,8 +14,9 @@ JSON_PATH = 'mainapp/json'
 #     traces_sample_rate=1.0
 # )
 
+
 def load_from_json(file_name):
-    with open(os.path.join(JSON_PATH, file_name + '.json'), 'r') as infile:
+    with open(os.path.join(JSON_PATH, file_name + '.json'), 'r', encoding='utf-8') as infile:
         return json.load(infile)
 
 
@@ -27,21 +28,21 @@ def load_from_json(file_name):
 
         
 def get_hot_product():
-    products = Product.objects.filter(is_active=True, category__is_active=True)
-    
+    products = Product.objects.filter(is_active=True, category__is_active=True).select_related('category')
     return random.sample(list(products), 1)[0]
-    
-    
+
+
 def get_same_products(hot_product):
-    same_products = Product.objects.filter(category=hot_product.category, is_active=True).exclude(pk=hot_product.pk)[:3]
-    
+    same_products = Product.objects.filter(category=hot_product.category, is_active=True).select_related('category').exclude(pk=hot_product.pk)[:3]
+
     return same_products
 
         
 def main(request):
     title = 'главная'  
-    products = Product.objects.filter(is_active=True, category__is_active=True)[:3]
-    
+    products = Product.objects.filter(is_active=True, category__is_active=True).select_related('category')[:3]
+    print(products.query)
+
     content = {
         'title': title,
         'products': products,
@@ -62,10 +63,10 @@ def products(request, pk=None, page=1):
                 'pk': 0,
                 'name': 'все'
             }
-            products = Product.objects.filter(is_active=True, category__is_active=True).order_by('price')
+            products = Product.objects.filter(is_active=True, category__is_active=True).order_by('price').select_related('category')
         else:
             category = get_object_or_404(ProductCategory, pk=pk)
-            products = Product.objects.filter(category__pk=pk, is_active=True, category__is_active=True).order_by('price')
+            products = Product.objects.filter(category__pk=pk, is_active=True, category__is_active=True).order_by('price').select_related('category')
         
         paginator = Paginator(products, 2)
         try:

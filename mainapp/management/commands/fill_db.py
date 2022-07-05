@@ -1,16 +1,17 @@
+import json
+import os
+
 from django.core.management.base import BaseCommand
-from mainapp.models import ProductCategory, Product
+
 from authapp.models import ShopUser
-
-import json, os
-
+from mainapp.models import ProductCategory, Product
 
 JSON_PATH = 'mainapp/json'
 
-def load_from_json(file_name):
-    with open(os.path.join(JSON_PATH, file_name + '.json'), 'r') as infile:
-        return json.load(infile)
 
+def load_from_json(file_name):
+    with open(os.path.join(JSON_PATH, file_name + '.json'), 'r', encoding='utf-8') as infile:
+        return json.load(infile)
 
 
 class Command(BaseCommand):
@@ -23,8 +24,7 @@ class Command(BaseCommand):
         for category in categories:
             new_category = ProductCategory(**category)
             new_category.save()
-        
-        
+
         products = load_from_json('products')
         
         Product.objects.all().delete()
