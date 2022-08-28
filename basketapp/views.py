@@ -3,9 +3,9 @@ from basketapp.models import Basket
 from mainapp.models import Product
 from django.contrib.auth.decorators import login_required
 from django.urls import reverse
-
 from django.template.loader import render_to_string
 from django.http import JsonResponse
+from django.db.models import F
 
 
 @login_required
@@ -29,13 +29,15 @@ def basket_add(request, pk):
     
     product = get_object_or_404(Product, pk=pk)
     basket = Basket.objects.filter(user=request.user, product=product).first()
-
     if not basket:
         basket = Basket(user=request.user, product=product)
-
-    basket.quantity += 1
+        # can't use F if field 'quantity' is not set yet:
+        basket.quantity = 1
+    # basket.quantity += 1
+    # basket.save()
+    else:
+        basket.quantity = F('quantity') + 1
     basket.save()
-    
     return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
     
 

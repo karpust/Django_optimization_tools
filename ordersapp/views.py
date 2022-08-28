@@ -6,35 +6,40 @@ from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render, get_object_or_404, reverse
 from django.urls import reverse_lazy
 from django.views.generic import ListView, CreateView, DetailView, UpdateView, DeleteView
-
 from basketapp.models import Basket
 from mainapp.models import Product
 from .forms import OrderItemForm
 from .models import Order, OrderItem
 from django.dispatch import receiver
 from django.db.models.signals import pre_save, pre_delete
+from django.db.models import F
+
 
 # Create your views here.
 
 
 # сигналы для корректировки остатков при добавлении товара в корзину:
-@receiver(pre_save, sender=OrderItem)  # сигнал, отправитель(класс модели, экземпляр кот будет сохранен)
-@receiver(pre_save, sender=Basket)
+# @receiver(pre_save, sender=OrderItem)  # сигнал, отправитель(класс модели, экземпляр кот будет сохранен)
+# @receiver(pre_save, sender=Basket)
 def product_quantity_update_save(sender, update_fields, instance, **kwargs):
     if update_fields is 'quantity' or 'product':
-        # новый это объект или уже существующий:
+        # если такой же товар уже есть в корзине/заказе:
         if instance.pk:
-            instance.product.quantity -= instance.quantity - sender.get_item(instance.pk).quantity
+            instance.product.quantity -= F('quantity') - sender.get_item(instance.pk).quantity
+            # instance.product.quantity -= instance.quantity - sender.get_item(instance.pk).quantity
+
+        # если такого же товара в корзине нет:
         else:
             instance.product.quantity -= instance.quantity
         instance.product.save()
 
 
 # сигналы для корректировки остатков при удалении товара из корзины:
-@receiver(pre_delete, sender=OrderItem)
-@receiver(pre_delete, sender=Basket)
+# @receiver(pre_delete, sender=OrderItem)
+# @receiver(pre_delete, sender=Basket)
 def product_quantity_update_delete(sender, instance, **kwargs):
-    instance.product.quantity += instance.quantity
+    instance.product.quantity += F('quantity')
+    # instance.product.quantity += instance.quantity
     instance.product.save()
 
 
@@ -96,7 +101,8 @@ class OrderItemsCreate(CreateView):
             orderitems.save()
 
         # удаляем пустой заказ
-        if self.object.get_total_cost() == 0:
+        # if self.object.get_total_cost() == 0:
+        if self.object.get_summary()['total_cost'] == 0:
             self.object.delete()
         return super(OrderItemsCreate, self).form_valid(form)
 
@@ -151,7 +157,8 @@ class OrderItemsUpdate(UpdateView):
             orderitems.save()
 
         # удаляем пустой заказ
-        if self.object.get_total_cost() == 0:
+        # if self.object.get_total_cost() == 0:
+        if self.object.get_summary()['total_cost'] == 0:
             self.object.delete()
         return super(OrderItemsUpdate, self).form_valid(form)
 

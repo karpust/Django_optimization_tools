@@ -1,3 +1,4 @@
+from django.utils.functional import cached_property
 from django.db import models
 from django.conf import settings
 from mainapp.models import Product
@@ -21,6 +22,10 @@ class Basket(models.Model):
     quantity = models.PositiveIntegerField(verbose_name='количество', default=0)
     add_datetime = models.DateTimeField(verbose_name='время добавления', auto_now_add=True)
 
+    @cached_property
+    def get_items_cached(self):
+        return Basket.objects.filter(user__id=self.user.id).select_related()
+
     @staticmethod
     def get_items(user):
         return Basket.objects.filter(user__id=user).select_related()
@@ -32,23 +37,20 @@ class Basket(models.Model):
     def _get_product_cost(self):
         "return cost of all products this type"
         return self.product.price * self.quantity
-    
     product_cost = property(_get_product_cost)
 
     def _get_total_quantity(self):
         "return total quantity for user"
-        _items = Basket.objects.filter(user=self.user).select_related('product')
-        _totalquantity = sum(list(map(lambda x: x.quantity, _items)))
-        return _totalquantity
-        
+        # _items = Basket.objects.filter(user=self.user).select_related('product')
+        _items = self.get_items_cached
+        return sum(list(map(lambda x: x.quantity, _items)))
     total_quantity = property(_get_total_quantity)
 
     def _get_total_cost(self):
         "return total cost for user"
-        _items = Basket.objects.filter(user=self.user).select_related('product')
-        _totalcost = sum(list(map(lambda x: x.product_cost, _items)))
-        return _totalcost
-        
+        # _items = Basket.objects.filter(user=self.user).select_related('product')
+        _items = self.get_items_cached
+        return sum(list(map(lambda x: x.product_cost, _items)))
     total_cost = property(_get_total_cost)
 
     # def save(self, *args, **kwargs):
